@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Аналітика витрат";
+    var labels = ViewBag.Labels as List<string>;
+    var amounts = ViewBag.Amounts as List<decimal>;
+}
+
+<h2>Аналітика витрат по місяцях</h2>
+
+<canvas id="expenseChart" width="800" height="400"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('expenseChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(Json.Serialize(labels)),
+            datasets: [{
+                label: 'Витрати (грн)',
+                data: @Html.Raw(Json.Serialize(amounts)),
+                fill: false,
+                borderColor: 'blue',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>

@@ -1,0 +1,20 @@
+﻿@page
+@model WebApplication1.Areas.Identity.Pages.Account.RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Підтвердження реєстрації";
+}
+
+<div class="text-center mt-5">
+    <h1 class="display-5 text-success">✅ Реєстрацію майже завершено!</h1>
+    <p class="mt-4 fs-5">
+        Ми надіслали лист з підтвердженням на адресу <strong>@Model.Email</strong>.
+    </p>
+
+    <p class="fs-6 text-muted">
+        Будь ласка, відкрийте свою поштову скриньку та підтвердьте акаунт, перейшовши за посиланням у листі.
+    </p>
+
+    <p class="text-muted mt-4">
+        Якщо ви не отримали листа — перевірте папку <strong>Спам</strong> або <strong>Усі листи</strong>.
+    </p>
+</div>

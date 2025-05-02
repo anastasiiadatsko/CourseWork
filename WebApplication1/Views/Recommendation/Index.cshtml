@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Рекомендації щодо витрат";
+    var tips = ViewBag.Recommendations as List<string>;
+}
+
+<h2>Рекомендації щодо витрат</h2>
+
+<ul class="list-group">
+    @foreach (var tip in tips)
+    {
+        <li class="list-group-item">@tip</li>
+    }
+</ul>

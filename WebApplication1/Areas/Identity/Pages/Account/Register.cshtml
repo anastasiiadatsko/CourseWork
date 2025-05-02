@@ -1,0 +1,50 @@
+﻿@page
+@model WebApplication1.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Створити акаунт";
+}
+
+<form method="post" class="d-flex" style="height: 100vh;">
+    <!-- Ліва частина з ілюстрацією -->
+    <div class="w-50 d-flex flex-column justify-content-center align-items-center bg-light text-center p-5">
+        <h1 class="display-6">Money come and go</h1>
+        <p class="text-muted mt-3" style="font-size: 14px; max-width: 400px;">
+            ФІНАНСИ (лат. financia — готівка, прибуток) — економічні відносини, які виникають у процесі розподілу і перерозподілу вартості національного багатства,
+            сукупного суспільного продукту і національного доходу у зв’язку з формуванням централізованих і децентралізованих грошових фондів.
+        </p>
+    </div>
+
+    <!-- Права частина з формою -->
+    <div class="w-50 d-flex flex-column justify-content-center align-items-center bg-secondary text-white p-5">
+        <h2 class="mb-4">Створити акаунт</h2>
+
+        <div class="form-group w-75 mb-3">
+            <label asp-for="Input.Email">Емейл</label>
+            <input asp-for="Input.Email" class="form-control" />
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group w-75 mb-3">
+            <label asp-for="Input.Password">Пароль</label>
+            <input asp-for="Input.Password" class="form-control" />
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-group w-75 mb-3">
+            <label asp-for="Input.ConfirmPassword">Підтвердіть пароль</label>
+            <input asp-for="Input.ConfirmPassword" class="form-control" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-50 mt-2">Створити акаунт</button>
+
+        <div class="mt-3">
+            Маєте створений акаунт?
+            <a asp-page="./Login" class="text-white">Увійти</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

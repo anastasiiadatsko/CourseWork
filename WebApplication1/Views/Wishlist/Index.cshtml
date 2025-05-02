@@ -1,0 +1,25 @@
+﻿@model IEnumerable<WebApplication1.Models.WishItem>
+
+<h2>Мій віш-лист</h2>
+
+<a class="btn btn-primary" asp-action="Create">Додати бажання</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Сума</th>
+            <th>Досяжне?</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.DesiredAmount грн</td>
+                <td>@(item.IsAffordable ? "Так" : "Ні")</td>
+            </tr>
+        }
+    </tbody>
+</table>
