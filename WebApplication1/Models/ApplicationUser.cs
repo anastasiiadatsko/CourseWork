@@ -7,5 +7,8 @@ namespace WebApplication1.Models
     {
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public string? ProfileImagePath { get; set; }
+        public ICollection<Wallet> Wallets { get; set; }
+        public ICollection<WishItem> WishItems { get; set; }
+
     }
 }

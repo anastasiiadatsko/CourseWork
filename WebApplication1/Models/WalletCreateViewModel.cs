@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Models
 {
-    public class Wallet
+    public class WalletCreateViewModel
     {
-        public int Id { get; set; }
-
         [Required]
         public string BankName { get; set; }
 
@@ -17,17 +14,16 @@ namespace WebApplication1.Models
         public string Currency { get; set; }
 
         [Required]
+        [Display(Name = "Номер карти")]
         public string CardNumber { get; set; }
 
         [Required]
+        [Display(Name = "Ініціали власника")]
         public string OwnerInitials { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, double.MaxValue)]
+        [Display(Name = "Залишок")]
         public decimal Balance { get; set; }
-
-        // FK до користувача
-        public string ApplicationUserId { get; set; }
-        public ApplicationUser ApplicationUser { get; set; }
     }
 }

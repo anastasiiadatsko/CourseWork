@@ -1,0 +1,160 @@
+﻿@model WebApplication1.Models.WalletCreateViewModel
+
+@{
+    ViewData["Title"] = "Створення гаманця";
+}
+
+<style>
+    .content {
+        display: flex;
+        padding: 40px;
+        gap: 30px;
+        flex-wrap: wrap;
+        background-color: #e0e0e0;
+    }
+
+    .card-preview {
+        flex: 1;
+        min-width: 350px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 400px;
+        height: 200px;
+        border-radius: 20px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        font-size: 18px;
+    }
+
+    .settings {
+        flex: 1;
+        min-width: 300px;
+        padding: 30px;
+        background-color: #bbb;
+        border-radius: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+        width: 100%;
+        padding: 5px;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+</style>
+
+<form asp-action="Create" method="post">
+    <div class="content">
+        <div class="card-preview">
+            <h2>Створення власного гаманця</h2>
+            <div class="card" id="walletCard">
+                <div><strong id="bankName">Банк</strong></div>
+                <div id="cardNumber">0000 0000 0000 0000</div>
+                <div id="owner">Ініціали</div>
+                <div><strong id="balance">0.00</strong> <span id="currency">грн</span></div>
+            </div>
+        </div>
+
+        <div class="settings">
+            <h2>Налаштування карти</h2>
+
+            <div class="form-group">
+                <label asp-for="BankName">Тип карти:</label>
+                <input type="radio" name="BankName" value="ПриватБанк"> ПриватБанк<br />
+                <input type="radio" name="BankName" value="МоноБанк"> МоноБанк<br />
+                <input type="radio" name="BankName" value="ОщадБанк"> ОщадБанк
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Color">Колір карти:</label>
+                <input type="radio" name="Color" value="green"> Зелена<br />
+                <input type="radio" name="Color" value="red"> Червона<br />
+                <input type="radio" name="Color" value="blue"> Синя<br />
+                <input type="radio" name="Color" value="black"> Чорна
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Currency">Тип валюти:</label>
+                <input type="radio" name="Currency" value="грн"> Гривні<br />
+                <input type="radio" name="Currency" value="€"> Євро<br />
+                <input type="radio" name="Currency" value="$"> Долари
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CardNumber">Номер карти:</label>
+                <input asp-for="CardNumber" id="inputNumber" class="form-control" />
+                <span asp-validation-for="CardNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="OwnerInitials">Ініціали власника:</label>
+                <input asp-for="OwnerInitials" id="inputOwner" class="form-control" />
+                <span asp-validation-for="OwnerInitials" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Balance">Залишок:</label>
+                <input asp-for="Balance" id="inputBalance" class="form-control" />
+                <span asp-validation-for="Balance" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-dark mt-3">Зберегти</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.querySelectorAll('input[name="BankName"]').forEach(el => {
+            el.addEventListener('change', e => {
+                document.getElementById('bankName').innerText = e.target.value;
+            });
+        });
+
+        document.querySelectorAll('input[name="Color"]').forEach(el => {
+            el.addEventListener('change', e => {
+                document.getElementById('walletCard').style.backgroundColor = e.target.value;
+            });
+        });
+
+        document.querySelectorAll('input[name="Currency"]').forEach(el => {
+            el.addEventListener('change', e => {
+                document.getElementById('currency').innerText = e.target.value;
+            });
+        });
+
+        document.getElementById('inputNumber').addEventListener('input', e => {
+            document.getElementById('cardNumber').innerText = e.target.value;
+        });
+
+        document.getElementById('inputOwner').addEventListener('input', e => {
+            document.getElementById('owner').innerText = e.target.value;
+        });
+
+        document.getElementById('inputBalance').addEventListener('input', e => {
+            const val = parseFloat(e.target.value || 0);
+            document.getElementById('balance').innerText = isNaN(val) ? '0.00' : val.toFixed(2);
+        });
+    </script>
+}
