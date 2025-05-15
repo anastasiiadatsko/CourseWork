@@ -1,0 +1,61 @@
+﻿@model WebApplication1.Models.Wallet
+
+@{
+    ViewData["Title"] = "Моя карта";
+}
+
+<style>
+    .wallet-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 50px;
+        background-color: #e0e0e0;
+        gap: 50px;
+        flex-wrap: wrap;
+    }
+
+    .wallet-card {
+        background-color: @Model.Color;
+        color: white;
+        border-radius: 20px;
+        width: 400px;
+        height: 200px;
+        padding: 25px;
+        font-size: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .wallet-label {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+
+    .wallet-number {
+        font-size: 22px;
+        letter-spacing: 2px;
+    }
+
+    .wallet-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+
+<div class="wallet-container">
+    <div>
+        <h2>Моя карта</h2>
+        <div class="wallet-card">
+            <div class="wallet-label">@Model.BankName</div>
+            <div class="wallet-number">@Model.CardNumber</div>
+            <div class="wallet-footer">
+                <div>@Model.Balance.ToString("F2") @Model.Currency</div>
+                <div>@Model.OwnerInitials</div>
+            </div>
+        </div>
+    </div>
+</div>
