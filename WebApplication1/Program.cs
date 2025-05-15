@@ -22,6 +22,9 @@ namespace WebApplication1
             {
                 options.SignIn.RequireConfirmedAccount = true;
             });
+           
+            builder.Services.AddHttpClient<NbuCurrencyService>();
+
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {

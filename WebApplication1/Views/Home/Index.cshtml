@@ -1,8 +1,91 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Курс валют НБУ за тиждень";
+    var usdLabels = ViewBag.UsdLabels as List<string>;
+    var usdValues = ViewBag.UsdValues as List<decimal>;
+    var eurLabels = ViewBag.EurLabels as List<string>;
+    var eurValues = ViewBag.EurValues as List<decimal>;
+    var plnLabels = ViewBag.PlnLabels as List<string>;
+    var plnValues = ViewBag.PlnValues as List<decimal>;
+    var weekOptions = ViewBag.WeekOptions as List<(string Label, string Value)>;
+    var selectedWeek = ViewBag.SelectedWeek as string ?? "";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2 class="text-center mb-4">Курс валют НБУ за обраний тиждень</h2>
+
+<form method="get" class="text-center mb-4">
+    <label for="weekOffset">Оберіть тиждень (дати):</label>
+    <select name="weekOffset" id="weekOffset" onchange="this.form.submit()">
+        @foreach (var (Label, Value) in weekOptions)
+        {
+            <option value="@Value" selected="@(Value == selectedWeek)">@Label</option>
+        }
+    </select>
+</form>
+
+<div class="container d-flex flex-wrap justify-content-center gap-4">
+    <div class="text-center" style="width: 300px;">
+        <h5>USD / Гривня</h5>
+        <canvas id="usdChart" height="200"></canvas>
+    </div>
+    <div class="text-center" style="width: 300px;">
+        <h5>EUR / Гривня</h5>
+        <canvas id="eurChart" height="200"></canvas>
+    </div>
+    <div class="text-center" style="width: 300px;">
+        <h5>PLN / Гривня</h5>
+        <canvas id="plnChart" height="200"></canvas>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function createChart(canvasId, labels, data, labelText, color) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: labelText,
+                    data: data,
+                    fill: false,
+                    borderColor: color,
+                    backgroundColor: color,
+                    tension: 0.3,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Дата'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Курс (UAH)'
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
+    createChart("usdChart", @Html.Raw(Json.Serialize(usdLabels)), @Html.Raw(Json.Serialize(usdValues)), "USD/UAH", "blue");
+    createChart("eurChart", @Html.Raw(Json.Serialize(eurLabels)), @Html.Raw(Json.Serialize(eurValues)), "EUR/UAH", "green");
+    createChart("plnChart", @Html.Raw(Json.Serialize(plnLabels)), @Html.Raw(Json.Serialize(plnValues)), "PLN/UAH", "red");
+</script>
