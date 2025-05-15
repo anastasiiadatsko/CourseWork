@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
@@ -9,16 +10,22 @@ namespace WebApplication1.Controllers
     public class WishlistController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public WishlistController(ApplicationDbContext context)
+        public WishlistController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Wishlist
         public async Task<IActionResult> Index()
         {
-            var items = await _context.WishItems.ToListAsync();
+            var userId = _userManager.GetUserId(User);
+            var items = await _context.WishItems
+                .Where(w => w.ApplicationUserId == userId)
+                .ToListAsync();
+
             return View(items);
         }
 
@@ -35,8 +42,9 @@ namespace WebApplication1.Controllers
         {
             if (ModelState.IsValid)
             {
-                item.IsAffordable = false; // Поки без перевірки бюджету
-                item.UserId = 1; // тимчасово, поки не реалізовано автентифікацію
+                var userId = _userManager.GetUserId(User);
+                item.ApplicationUserId = userId;
+                item.IsAffordable = false;
 
                 _context.Add(item);
                 await _context.SaveChangesAsync();
