@@ -1,5 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,53 +6,58 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using WebApplication1.Models;
 using WebApplication1.Services;
+using Microsoft.Extensions.Logging;
 
-public class ForgotPasswordModel : PageModel
+namespace WebApplication1.Areas.Identity.Pages.Account
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IEmailSender _emailSender;
-
-    public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+    public class ForgotPasswordModel : PageModel
     {
-        _userManager = userManager;
-        _emailSender = emailSender;
-    }
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
+        private readonly ILogger<ForgotPasswordModel> _logger;
 
-    [BindProperty]
-    public InputModel Input { get; set; }
-
-    public class InputModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-    }
-
-    public async Task<IActionResult> OnPostAsync()
-    {
-        if (!ModelState.IsValid)
-            return Page();
-
-        var user = await _userManager.FindByEmailAsync(Input.Email);
-        if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+        public ForgotPasswordModel(
+            UserManager<ApplicationUser> userManager,
+            IEmailSender emailSender,
+            ILogger<ForgotPasswordModel> logger)
         {
-            return RedirectToPage("./ForgotPasswordConfirmation");
+            _userManager = userManager;
+            _emailSender = emailSender;
+            _logger = logger;
         }
 
-        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        [BindProperty]
+        public ForgotPasswordViewModel Input { get; set; } = new();
 
-        var callbackUrl = Url.Page(
-            "/Account/ResetPassword",
-            null,
-            new { area = "Identity", code },
-            Request.Scheme);
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+                return Page();
 
-        await _emailSender.SendEmailAsync(
-            Input.Email,
-            "�������� ������",
-            $"��������� <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>���</a>, ��� ������� ������.");
+            var user = await _userManager.FindByEmailAsync(Input.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                _logger.LogWarning("⚠️ Email не знайдено або не підтверджено: {Email}", Input.Email);
+                return RedirectToPage("./ForgotPasswordConfirmation");
+            }
 
-        return RedirectToPage("./ForgotPasswordConfirmation");
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+            var callbackUrl = Url.Page(
+                "/Account/ResetPassword",
+                null,
+                new { area = "Identity", code },
+                Request.Scheme);
+
+            await _emailSender.SendEmailAsync(
+                Input.Email,
+                "Скидання паролю",
+                $"<h3>Скидання паролю</h3><p>Натисніть <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>тут</a>, щоб скинути пароль.</p>");
+
+            _logger.LogInformation("📧 Email для скидання паролю надіслано: {Email}", Input.Email);
+
+            return RedirectToPage("./ForgotPasswordConfirmation");
+        }
     }
 }

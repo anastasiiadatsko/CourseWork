@@ -1,76 +1,62 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using WebApplication1.Models;
 
-public class ResetPasswordModel : PageModel
+namespace WebApplication1.Areas.Identity.Pages.Account
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ILogger<ResetPasswordModel> _logger;
-
-    public ResetPasswordModel(UserManager<ApplicationUser> userManager, ILogger<ResetPasswordModel> logger)
+    public class ResetPasswordModel : PageModel
     {
-        _userManager = userManager;
-        _logger = logger;
-    }
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<ResetPasswordModel> _logger;
 
-    [BindProperty]
-    public InputModel Input { get; set; }
+        public ResetPasswordModel(UserManager<ApplicationUser> userManager, ILogger<ResetPasswordModel> logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
 
-    public class InputModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        [BindProperty]
+        public ResetPasswordViewModel Input { get; set; } = new();
 
-        [Required]
-        [StringLength(100, ErrorMessage = "Мінімум 6 символів", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public IActionResult OnGet(string code = null)
+        {
+            if (code == null)
+                return BadRequest("Код обовʼязковий");
 
-        [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Паролі не співпадають.")]
-        public string ConfirmPassword { get; set; }
-
-        public string Code { get; set; }
-    }
-
-    public IActionResult OnGet(string code = null)
-    {
-        if (code == null)
-            return BadRequest("Код обовʼязковий");
-
-        Input = new InputModel { Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)) };
-        return Page();
-    }
-
-    public async Task<IActionResult> OnPostAsync()
-    {
-        if (!ModelState.IsValid)
+            Input.Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             return Page();
-
-        var user = await _userManager.FindByEmailAsync(Input.Email);
-        if (user == null)
-            return RedirectToPage("./ResetPasswordConfirmation");
-
-        var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
-        if (result.Succeeded)
-        {
-            _logger.LogInformation("🔑 Пароль змінено для " + user.Email);
-            return RedirectToPage("./ResetPasswordConfirmation");
         }
 
-        foreach (var error in result.Errors)
+        public async Task<IActionResult> OnPostAsync()
         {
-            _logger.LogError("❌ Помилка скидання паролю: " + error.Description);
-            ModelState.AddModelError(string.Empty, error.Description);
+            if (!ModelState.IsValid)
+                return Page();
+
+            var user = await _userManager.FindByEmailAsync(Input.Email);
+            if (user == null)
+            {
+                _logger.LogWarning("⚠️ Користувач із email {Email} не знайдений", Input.Email);
+                return RedirectToPage("./ResetPasswordConfirmation");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("🔑 Пароль змінено для {Email}", user.Email);
+                return RedirectToPage("./ResetPasswordConfirmation");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                _logger.LogError("❌ Помилка скидання паролю: " + error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return Page();
         }
-
-        return Page();
-
     }
-
 }
