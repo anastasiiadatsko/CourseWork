@@ -9,10 +9,12 @@ using WebApplication1.Models;
 public class ResetPasswordModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ILogger<ResetPasswordModel> _logger;
 
-    public ResetPasswordModel(UserManager<ApplicationUser> userManager)
+    public ResetPasswordModel(UserManager<ApplicationUser> userManager, ILogger<ResetPasswordModel> logger)
     {
         _userManager = userManager;
+        _logger = logger;
     }
 
     [BindProperty]
@@ -56,11 +58,19 @@ public class ResetPasswordModel : PageModel
 
         var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
         if (result.Succeeded)
+        {
+            _logger.LogInformation("🔑 Пароль змінено для " + user.Email);
             return RedirectToPage("./ResetPasswordConfirmation");
+        }
 
         foreach (var error in result.Errors)
+        {
+            _logger.LogError("❌ Помилка скидання паролю: " + error.Description);
             ModelState.AddModelError(string.Empty, error.Description);
+        }
 
         return Page();
+
     }
+
 }
