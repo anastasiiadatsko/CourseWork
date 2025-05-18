@@ -1,53 +1,46 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Services;
 
-namespace WebApplication1.Controllers
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly NbuCurrencyService _nbuService;
+    private readonly BtcService _btcService;
+
+    public HomeController(NbuCurrencyService nbuService, BtcService btcService)
     {
-        private readonly NbuCurrencyService _nbuService;
+        _nbuService = nbuService;
+        _btcService = btcService;
+    }
 
-        public HomeController(NbuCurrencyService nbuService)
-        {
-            _nbuService = nbuService;
-        }
+    public async Task<IActionResult> Index()
+    {
+        // Встановлюємо тижневий діапазон
+        var endDate = DateTime.Today;
+        var startDate = endDate.AddDays(-6);
 
-        public async Task<IActionResult> Index(int weekOffset = 0)
-        {
-            // обчислюємо тижневі проміжки
-            var today = DateTime.Today;
-            var weekOptions = new List<(string Label, string Value)>();
+        ViewBag.WeekOptions = null;
+        ViewBag.SelectedWeek = "";
 
-            for (int i = 0; i < 6; i++)
-            {
-                var start = today.AddDays(-7 * (i + 1) + 1);
-                var end = today.AddDays(-7 * i);
-                string label = $"{start:dd.MM.yyyy} - {end:dd.MM.yyyy}";
-                string value = i.ToString();
-                weekOptions.Add((label, value));
-            }
+        // --- НБУ курси ---
+        var usd = await _nbuService.GetRatesForPeriodAsync("USD", startDate, endDate);
+        var eur = await _nbuService.GetRatesForPeriodAsync("EUR", startDate, endDate);
+        var pln = await _nbuService.GetRatesForPeriodAsync("PLN", startDate, endDate);
 
-            ViewBag.WeekOptions = weekOptions;
-            ViewBag.SelectedWeek = weekOffset.ToString();
+        ViewBag.UsdLabels = usd.Select(x => x.Exchangedate).ToList();
+        ViewBag.UsdValues = usd.Select(x => x.Rate).ToList();
 
-            // вибраний діапазон дат
-            var startDate = today.AddDays(-7 * (weekOffset + 1) + 1);
-            var endDate = today.AddDays(-7 * weekOffset);
+        ViewBag.EurLabels = eur.Select(x => x.Exchangedate).ToList();
+        ViewBag.EurValues = eur.Select(x => x.Rate).ToList();
 
-            var usd = await _nbuService.GetRatesForPeriodAsync("USD", startDate, endDate);
-            var eur = await _nbuService.GetRatesForPeriodAsync("EUR", startDate, endDate);
-            var pln = await _nbuService.GetRatesForPeriodAsync("PLN", startDate, endDate);
+        ViewBag.PlnLabels = pln.Select(x => x.Exchangedate).ToList();
+        ViewBag.PlnValues = pln.Select(x => x.Rate).ToList();
 
-            ViewBag.UsdLabels = usd.Select(r => r.Exchangedate).ToList();
-            ViewBag.UsdValues = usd.Select(r => r.Rate).ToList();
+        // --- BTC курс ---
+        var btcData = await _btcService.GetPricesForPeriodAsync("bitcoin", startDate, endDate);
 
-            ViewBag.EurLabels = eur.Select(r => r.Exchangedate).ToList();
-            ViewBag.EurValues = eur.Select(r => r.Rate).ToList();
+        ViewBag.BtcLabels = btcData.Select(x => x.Date).ToList();
+        ViewBag.BtcValues = btcData.Select(x => x.Price).ToList();
 
-            ViewBag.PlnLabels = pln.Select(r => r.Exchangedate).ToList();
-            ViewBag.PlnValues = pln.Select(r => r.Rate).ToList();
-
-            return View();
-        }
+        return View();
     }
 }

@@ -1,0 +1,18 @@
+﻿@model WebApplication1.Models.WishItem
+@{
+    ViewData["Title"] = "Видалити бажання";
+}
+
+<h2>Ви дійсно хочете видалити бажання?</h2>
+
+<div>
+    <h4>@Model.Title</h4>
+    <p><strong>Сума:</strong> @Model.TargetAmount</p>
+    <p><strong>До:</strong> @Model.TargetDate?.ToShortDateString()</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Так, видалити</button>
+    <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+</form>

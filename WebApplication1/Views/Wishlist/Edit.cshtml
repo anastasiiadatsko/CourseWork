@@ -1,12 +1,14 @@
 ﻿@model WebApplication1.Models.WishItem
 
 @{
-    ViewData["Title"] = "Нове бажання";
+    ViewData["Title"] = "Редагування бажання";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<form asp-action="Create" method="post">
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
     <div class="form-group">
         <label asp-for="Title"></label>
         <input asp-for="Title" class="form-control" />
@@ -14,7 +16,7 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="TargetAmount">Бажана сума (у гривнях)</label>
+        <label asp-for="TargetAmount">Бажана сума (грн)</label>
         <input asp-for="TargetAmount" class="form-control" />
         <span asp-validation-for="TargetAmount" class="text-danger"></span>
     </div>
@@ -27,11 +29,11 @@
 
     <div class="form-check mb-3">
         <input asp-for="IsCompleted" class="form-check-input" />
-        <label asp-for="IsCompleted" class="form-check-label"></label>
+        <label asp-for="IsCompleted" class="form-check-label">Виконано</label>
     </div>
 
     <button type="submit" class="btn btn-primary">Зберегти</button>
-    <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
 </form>
 
 @section Scripts {

@@ -25,6 +25,7 @@ namespace WebApplication1
            
             builder.Services.AddHttpClient<NbuCurrencyService>();
 
+            builder.Services.AddHttpClient<BtcService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
