@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using WebApplication1.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.Areas.Identity.Pages.Account
 {
@@ -36,34 +35,15 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         }
 
         [BindProperty]
-        public InputModel Input { get; set; }
+        public RegisterViewModel Input { get; set; } = new();
 
-        public string ReturnUrl { get; set; }
+        public string ReturnUrl { get; set; } = "/";
 
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
-
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-
-            [Required]
-            [StringLength(100, ErrorMessage = "Пароль має бути мінімум {2} символів.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Пароль")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Підтвердження пароля")]
-            [Compare("Password", ErrorMessage = "Паролі не співпадають.")]
-            public string ConfirmPassword { get; set; }
-        }
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            ReturnUrl = returnUrl;
+            ReturnUrl = returnUrl ?? Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
@@ -94,14 +74,10 @@ namespace WebApplication1.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code },
                         protocol: Request.Scheme);
 
-                    _logger.LogInformation("📧 Надсилаю лист на: {Email}", Input.Email);
-
                     await _emailSender.SendEmailAsync(
                         Input.Email,
                         "Підтвердження акаунту",
-                        $"<h2>Дякуємо за реєстрацію!</h2>" +
-                        $"<p>Щоб активувати акаунт, натисніть нижче:</p>" +
-                        $"<p><a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Підтвердити акаунт</a></p>");
+                        $"<h2>Дякуємо за реєстрацію!</h2><p>Натисніть <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>тут</a>, щоб підтвердити акаунт.</p>");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -114,11 +90,9 @@ namespace WebApplication1.Areas.Identity.Pages.Account
                     }
                 }
 
-                _logger.LogError("❌ Користувача НЕ створено");
-
                 foreach (var error in result.Errors)
                 {
-                    _logger.LogError("Помилка: {Error}", error.Description);
+                    _logger.LogError("❌ Помилка створення користувача: " + error.Description);
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
@@ -134,7 +108,7 @@ namespace WebApplication1.Areas.Identity.Pages.Account
             }
             catch
             {
-                throw new InvalidOperationException($"Неможливо створити '{nameof(ApplicationUser)}'. Перевірь наявність конструктора без параметрів.");
+                throw new InvalidOperationException($"Неможливо створити об'єкт '{nameof(ApplicationUser)}'. Переконайтесь, що клас має конструктор без параметрів.");
             }
         }
 
@@ -142,7 +116,7 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         {
             if (!_userManager.SupportsUserEmail)
             {
-                throw new NotSupportedException("Цей UserStore не підтримує email.");
+                throw new NotSupportedException("UserStore не підтримує Email.");
             }
             return (IUserEmailStore<ApplicationUser>)_userStore;
         }
