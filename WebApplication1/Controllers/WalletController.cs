@@ -48,20 +48,32 @@ namespace WebApplication1.Controllers
             _context.Wallets.Add(wallet);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Details");
+            // ✅ Перехід до сторінки перегляду створеного гаманця
+            return RedirectToAction("Details", new { id = wallet.Id });
         }
 
-        public async Task<IActionResult> Details()
+        public async Task<IActionResult> Index()
+        {
+            var userId = _userManager.GetUserId(User);
+            var wallets = await _context.Wallets
+                .Where(w => w.ApplicationUserId == userId)
+                .ToListAsync();
+
+            return View(wallets);
+        }
+
+        public async Task<IActionResult> Details(int id)
         {
             var userId = _userManager.GetUserId(User);
             var wallet = await _context.Wallets
-                .FirstOrDefaultAsync(w => w.ApplicationUserId == userId);
+                .FirstOrDefaultAsync(w => w.Id == id && w.ApplicationUserId == userId);
 
             if (wallet == null)
-                return RedirectToAction("Create");
+                return NotFound();
 
             return View(wallet);
         }
+
 
     }
 }

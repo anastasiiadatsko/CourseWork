@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using WebApplication1.Models;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
+using WebApplication1.Models;
 
 namespace WebApplication1.Areas.Identity.Pages.Account
 {
@@ -24,9 +25,10 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         [BindProperty]
         public LoginViewModel Input { get; set; } = new();
 
-        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
-
+        [BindProperty(SupportsGet = true)]
         public string ReturnUrl { get; set; } = "/";
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
         [TempData]
         public string ErrorMessage { get; set; } = string.Empty;
@@ -56,20 +58,27 @@ namespace WebApplication1.Areas.Identity.Pages.Account
                 return Page();
             }
 
+            var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+            if (user != null && !await _signInManager.UserManager.IsEmailConfirmedAsync(user))
+            {
+                ModelState.AddModelError(string.Empty, "Підтвердіть email перед входом.");
+                return Page();
+            }
+
             var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("🔐 Користувач увійшов: " + Input.Email);
+                _logger.LogInformation("🔐 Користувач увійшов: {Email}", Input.Email);
                 return LocalRedirect(ReturnUrl);
             }
             if (result.RequiresTwoFactor)
             {
-                return RedirectToPage("./LoginWith2fa", new { ReturnUrl, Input.RememberMe });
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("🚫 Акаунт заблокований: " + Input.Email);
+                _logger.LogWarning("🚫 Акаунт заблокований: {Email}", Input.Email);
                 return RedirectToPage("./Lockout");
             }
 
