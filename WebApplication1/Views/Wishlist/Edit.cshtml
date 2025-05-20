@@ -1,5 +1,4 @@
 ﻿@model WebApplication1.Models.WishItem
-
 @{
     ViewData["Title"] = "Редагування бажання";
 }
@@ -16,20 +15,21 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="TargetAmount">Бажана сума (грн)</label>
+        <label asp-for="TargetAmount"></label>
         <input asp-for="TargetAmount" class="form-control" />
         <span asp-validation-for="TargetAmount" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="TargetDate">Придбати до</label>
+        <label asp-for="TargetDate"></label>
         <input asp-for="TargetDate" type="date" class="form-control" />
         <span asp-validation-for="TargetDate" class="text-danger"></span>
     </div>
 
+
     <div class="form-check mb-3">
         <input asp-for="IsCompleted" class="form-check-input" />
-        <label asp-for="IsCompleted" class="form-check-label">Виконано</label>
+        <label asp-for="IsCompleted" class="form-check-label"></label>
     </div>
 
     <button type="submit" class="btn btn-primary">Зберегти</button>

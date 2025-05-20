@@ -1,8 +1,7 @@
 ﻿@model IEnumerable<WebApplication1.Models.WishItem>
 
 @{
-    ViewData["Title"] = "Віш-лист";
-    var selectedMonth = ViewBag.Month as string;
+    ViewData["Title"] = "Список бажань";
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -17,9 +16,10 @@
             {
                 if (!string.IsNullOrEmpty(months[i]))
                 {
-                    var value = (i + 1).ToString(); // місяць як число
-                    var selected = selectedMonth == value ? "selected" : "";
-                    @Html.Raw($"<option value=\"{value}\" {selected}>{months[i]}</option>")
+                    var value = months[i];
+                    var selected = ViewBag.Month == value ? "selected" : "";
+                    <option value="@value" selected="@(ViewBag.Month == value ? "selected" : null)">@value</option>
+
                 }
             }
         }

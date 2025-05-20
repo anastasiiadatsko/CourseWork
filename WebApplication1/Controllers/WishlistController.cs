@@ -25,7 +25,6 @@ namespace WebApplication1.Controllers
 
             if (!string.IsNullOrEmpty(month))
             {
-                // Отримуємо номер місяця з назви (укр)
                 var culture = System.Globalization.CultureInfo.GetCultureInfo("uk-UA");
                 var monthIndex = Array.FindIndex(
                     culture.DateTimeFormat.MonthNames,
@@ -44,7 +43,6 @@ namespace WebApplication1.Controllers
             var list = await wishesQuery.OrderBy(w => w.TargetDate).ToListAsync();
             return View(list);
         }
-
 
         public IActionResult Create() => View();
 
@@ -96,8 +94,8 @@ namespace WebApplication1.Controllers
             {
                 existing.Title = updated.Title;
                 existing.TargetAmount = updated.TargetAmount;
-                existing.Month = updated.Month;
-                existing.IsAchievable = updated.IsAchievable;
+                //existing.Month = updated.Month;
+                //existing.IsAchievable = updated.IsAchievable;
                 existing.IsCompleted = updated.IsCompleted;
 
                 if (updated.TargetDate.HasValue)
