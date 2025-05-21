@@ -12,14 +12,9 @@
 
     <input type="hidden" asp-for="ReturnUrl" />
 
-    @if (!ViewData.ModelState.IsValid)
+    @if (Model.ErrorMessage != null && Model.ErrorMessage != "")
     {
-        <div class="alert alert-danger">
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <div>@error.ErrorMessage</div>
-            }
-        </div>
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
     }
 
     <div class="mb-3">

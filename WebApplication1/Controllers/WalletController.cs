@@ -18,13 +18,11 @@ namespace WebApplication1.Controllers
             _userManager = userManager;
         }
 
-        // GET: /Wallet/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /Wallet/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(WalletCreateViewModel model)
@@ -48,7 +46,6 @@ namespace WebApplication1.Controllers
             _context.Wallets.Add(wallet);
             await _context.SaveChangesAsync();
 
-            // ✅ Перехід до сторінки перегляду створеного гаманця
             return RedirectToAction("Details", new { id = wallet.Id });
         }
 
@@ -64,16 +61,70 @@ namespace WebApplication1.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var userId = _userManager.GetUserId(User);
-            var wallet = await _context.Wallets
-                .FirstOrDefaultAsync(w => w.Id == id && w.ApplicationUserId == userId);
-
+            var wallet = await _context.Wallets.FindAsync(id);
             if (wallet == null)
                 return NotFound();
 
             return View(wallet);
         }
 
+        // Редагування (GET)
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+                return NotFound();
 
+            var wallet = await _context.Wallets.FindAsync(id);
+            if (wallet == null)
+                return NotFound();
+
+            return View(wallet);
+        }
+
+        // Редагування (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Wallet wallet)
+        {
+            if (id != wallet.Id)
+            {
+                Console.WriteLine("⚠️ ID у URL не співпадає з Wallet.Id");
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                foreach (var key in ModelState.Keys)
+                {
+                    foreach (var error in ModelState[key].Errors)
+                    {
+                        Console.WriteLine($"❌ {key}: {error.ErrorMessage}");
+                    }
+                }
+
+                return View(wallet);
+            }
+
+            try
+            {
+                _context.Update(wallet);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ Гаманець оновлено. ID: {wallet.Id}");
+                return RedirectToAction("Details", new { id = wallet.Id });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Wallets.Any(e => e.Id == wallet.Id))
+                {
+                    Console.WriteLine($"❌ Не знайдено гаманець із ID: {wallet.Id}");
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
     }
 }

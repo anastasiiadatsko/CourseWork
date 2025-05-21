@@ -14,10 +14,9 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<ResetPasswordModel> _logger;
 
-        public ResetPasswordModel(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<ResetPasswordModel> logger)
+        public ResetPasswordModel(UserManager<ApplicationUser> userManager,
+                                   SignInManager<ApplicationUser> signInManager,
+                                   ILogger<ResetPasswordModel> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -27,13 +26,16 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         [BindProperty]
         public ResetPasswordViewModel Input { get; set; } = new();
 
-        public IActionResult OnGet(string userId, string token)
+        public IActionResult OnGet(string code, string email)
         {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
-                return BadRequest("Користувач або токен відсутні");
+            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(email))
+            {
+                _logger.LogError("⛔ Код або email не передані");
+                return RedirectToPage("./Login");
+            }
 
-            Input.UserId = userId;
-            Input.Token = token;
+            Input.Token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            Input.Email = email;
             return Page();
         }
 
@@ -42,27 +44,24 @@ namespace WebApplication1.Areas.Identity.Pages.Account
             if (!ModelState.IsValid)
                 return Page();
 
-            var user = await _userManager.FindByIdAsync(Input.UserId);
+            var user = await _userManager.FindByEmailAsync(Input.Email);
+
             if (user == null)
             {
-                _logger.LogWarning("Користувача не знайдено: {UserId}", Input.UserId);
+                _logger.LogWarning("⛔ Користувача не знайдено: {Email}", Input.Email);
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
 
             var result = await _userManager.ResetPasswordAsync(user, Input.Token, Input.NewPassword);
             if (result.Succeeded)
             {
-                _logger.LogInformation("🔑 Пароль змінено для {Email}", user.Email);
-
-                // 🔐 Автоматичний вхід
+                _logger.LogInformation("✅ Пароль оновлено для {Email}", user.Email);
                 await _signInManager.SignInAsync(user, isPersistent: false);
-
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
 
             foreach (var error in result.Errors)
             {
-                _logger.LogError("❌ Помилка: " + error.Description);
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 

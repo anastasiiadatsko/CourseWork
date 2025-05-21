@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +15,6 @@ namespace WebApplication1
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            // ϳ��������� Entity Framework + PostgreSQL
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -22,9 +22,8 @@ namespace WebApplication1
             {
                 options.SignIn.RequireConfirmedAccount = true;
             });
-           
-            builder.Services.AddHttpClient<NbuCurrencyService>();
 
+            builder.Services.AddHttpClient<NbuCurrencyService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
@@ -33,22 +32,23 @@ namespace WebApplication1
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
-
                 options.SignIn.RequireConfirmedEmail = true;
             })
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-
-
-            // ��� Identity UI
             builder.Services.AddRazorPages();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // ✅ Встановлюємо культуру з крапкою як роздільником десяткових чисел
+            var cultureInfo = new CultureInfo("uk-UA");
+            cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -60,11 +60,9 @@ namespace WebApplication1
 
             app.UseRouting();
 
-            // ������: �������������� + �����������
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // ϳ��������� Razor Pages ��� Identity
             app.MapRazorPages();
 
             app.MapControllerRoute(

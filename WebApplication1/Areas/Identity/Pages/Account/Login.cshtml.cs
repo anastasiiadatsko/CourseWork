@@ -26,14 +26,14 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         public LoginViewModel Input { get; set; } = new();
 
         [BindProperty(SupportsGet = true)]
-        public string ReturnUrl { get; set; } = "/";
+        public string? ReturnUrl { get; set; }
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
         [TempData]
         public string ErrorMessage { get; set; } = string.Empty;
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string? returnUrl = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
@@ -47,41 +47,50 @@ namespace WebApplication1.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             ReturnUrl = returnUrl ?? Url.Content("~/");
 
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
             if (!ModelState.IsValid)
+                return Page();
+
+            var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+
+            if (user == null)
             {
+                _logger.LogWarning("❌ Email не знайдено: {Email}", Input.Email);
+                ModelState.AddModelError(string.Empty, "Невдала спроба входу.");
                 return Page();
             }
 
-            var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
-            if (user != null && !await _signInManager.UserManager.IsEmailConfirmedAsync(user))
+            if (!await _signInManager.UserManager.IsEmailConfirmedAsync(user))
             {
+                _logger.LogWarning("❌ Email не підтверджено: {Email}", Input.Email);
                 ModelState.AddModelError(string.Empty, "Підтвердіть email перед входом.");
                 return Page();
             }
 
-            var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("🔐 Користувач увійшов: {Email}", Input.Email);
+                _logger.LogInformation("✅ Вхід успішний: {Email}", Input.Email);
                 return LocalRedirect(ReturnUrl);
             }
-            if (result.RequiresTwoFactor)
-            {
-                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
-            }
+
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("🚫 Акаунт заблокований: {Email}", Input.Email);
+                _logger.LogWarning("🚫 Акаунт заблоковано: {Email}", Input.Email);
                 return RedirectToPage("./Lockout");
             }
 
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = ReturnUrl, Input.RememberMe });
+            }
+
+            _logger.LogWarning("❌ Невдала спроба входу: {Email}", Input.Email);
             ModelState.AddModelError(string.Empty, "Невдала спроба входу.");
             return Page();
         }

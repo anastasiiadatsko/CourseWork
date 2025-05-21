@@ -104,13 +104,16 @@ namespace WebApplication1.Areas.Identity.Pages.Account
         {
             try
             {
-                return Activator.CreateInstance<ApplicationUser>();
+                var user = Activator.CreateInstance<ApplicationUser>();
+                user.UserName = Input.Email; // 🟢 Пряме присвоєння
+                return user;
             }
             catch
             {
                 throw new InvalidOperationException($"Неможливо створити об'єкт '{nameof(ApplicationUser)}'. Переконайтесь, що клас має конструктор без параметрів.");
             }
         }
+
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()
         {

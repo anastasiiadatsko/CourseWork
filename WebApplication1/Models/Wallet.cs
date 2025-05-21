@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Models
@@ -27,7 +28,10 @@ namespace WebApplication1.Models
         public decimal Balance { get; set; }
 
         // FK до користувача
+        [Required]
         public string ApplicationUserId { get; set; }
+
+        [ValidateNever]
         public ApplicationUser ApplicationUser { get; set; }
     }
 }

@@ -5,10 +5,10 @@ namespace WebApplication1.Models
     public class ResetPasswordViewModel
     {
         [Required]
-        public string UserId { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
 
         [Required]
-        public string Token { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Введіть новий пароль")]
         [DataType(DataType.Password)]
