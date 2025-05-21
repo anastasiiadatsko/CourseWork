@@ -65,8 +65,16 @@ namespace WebApplication1.Controllers
             if (wallet == null)
                 return NotFound();
 
+            var transactions = await _context.Transactions
+                .Where(t => t.WalletId == id)
+                .OrderByDescending(t => t.Date)
+                .ToListAsync();
+
+            ViewBag.Transactions = transactions;
+
             return View(wallet);
         }
+
 
         // Редагування (GET)
         public async Task<IActionResult> Edit(int? id)

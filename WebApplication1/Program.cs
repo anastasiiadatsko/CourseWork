@@ -12,6 +12,13 @@ namespace WebApplication1
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var cultureInfo = new CultureInfo("uk-UA");
+            cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
+
             // Додаємо контролери та представлення
             builder.Services.AddControllersWithViews();
 
@@ -51,10 +58,10 @@ namespace WebApplication1
             var app = builder.Build();
 
             // Культура з крапкою як роздільником десяткових чисел
-            var cultureInfo = new CultureInfo("uk-UA");
-            cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
-            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
-            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+            var ukCulture = new CultureInfo("uk-UA");
+            ukCulture.NumberFormat.NumberDecimalSeparator = ".";
+            CultureInfo.DefaultThreadCurrentCulture = ukCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = ukCulture;
 
             // Конфігурація HTTP пайплайну
             if (!app.Environment.IsDevelopment())

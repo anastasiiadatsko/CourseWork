@@ -2,12 +2,15 @@
 
 @{
     ViewData["Title"] = "Моя карта";
+    var transactions = ViewBag.Transactions as List<WebApplication1.Models.Transaction>;
 }
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <style>
     .wallet-container {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: flex-start;
         padding: 50px;
         background-color: #e0e0e0;
@@ -44,6 +47,13 @@
         justify-content: space-between;
         align-items: center;
     }
+
+    .carousel-item {
+        padding: 10px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 </style>
 
 <div class="wallet-container">
@@ -60,4 +70,39 @@
 
         <a asp-action="Edit" asp-controller="Wallet" asp-route-id="@Model.Id" class="btn btn-outline-light mt-2">Редагувати</a>
     </div>
+
+    <div class="flex-grow-1">
+        <h4>Останні витрати</h4>
+        @if (transactions != null && transactions.Any())
+        {
+            <div id="expenseCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @for (int i = 0; i < transactions.Count; i++)
+                    {
+                        var t = transactions[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <h5>@t.Category</h5>
+                            <p>Сума: @t.Amount</p>
+                            <td>
+                                @(t.Type == TransactionType.Income ? "Дохід" : "Витрата")
+                            </td>
+                            <p>Дата: @t.Date.ToString("dd.MM.yyyy HH:mm")</p>
+                        </div>
+                    }
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#expenseCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#expenseCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        }
+        else
+        {
+            <p>Немає транзакцій для цього гаманця.</p>
+        }
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

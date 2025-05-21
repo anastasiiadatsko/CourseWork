@@ -18,40 +18,82 @@ namespace WebApplication1.Controllers
             _userManager = userManager;
         }
 
-        // GET: Transaction/Create
-        public IActionResult Create()
+        // GET: Transaction/Index
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var userId = _userManager.GetUserId(User);
+
+            var wallets = await _context.Wallets
+                .Where(w => w.ApplicationUserId == userId)
+                .ToListAsync();
+
+            var transactions = await _context.Transactions
+                .Include(t => t.Wallet)
+                .Where(t => t.Wallet.ApplicationUserId == userId)
+                .OrderByDescending(t => t.Date)
+                .ToListAsync();
+
+            ViewBag.Wallets = wallets;
+            ViewBag.Categories = new List<string> { "Їжа", "Транспорт", "Відпочинок", "Розваги", "Інше" };
+            ViewBag.Transactions = transactions;
+
+            return View(new Transaction());
         }
 
-        // POST: Transaction/Create
+        // POST: Transaction/Index
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Transaction transaction)
+        public async Task<IActionResult> Index(Transaction transaction)
         {
+            var userId = _userManager.GetUserId(User);
+
             if (ModelState.IsValid)
             {
-                var userId = _userManager.GetUserId(User); // string
+                transaction.Date = DateTime.UtcNow;
 
-                transaction.Date = DateTime.Now;
-                transaction.Type = transaction.Amount > 0 ? TransactionType.Income : TransactionType.Expense;
+                var wallet = await _context.Wallets
+                    .FirstOrDefaultAsync(w => w.Id == transaction.WalletId && w.ApplicationUserId == userId);
 
-                // TODO: якщо реалізуєш Wallet, знайди гаманець користувача тут
-                // transaction.WalletId = await _context.Wallets.Where(w => w.ApplicationUserId == userId).Select(w => w.Id).FirstOrDefaultAsync();
+                if (wallet == null)
+                {
+                    ModelState.AddModelError("", "Обраний гаманець не знайдено.");
+                }
+                else
+                {
+                    // Оновлення балансу:
+                    if (transaction.Type == TransactionType.Expense)
+                    {
+                        wallet.Balance -= transaction.Amount;
+                    }
+                    else if (transaction.Type == TransactionType.Income)
+                    {
+                        wallet.Balance += transaction.Amount;
+                    }
 
-                transaction.WalletId = 1; // тимчасово, поки Wallet не реалізований
+                    _context.Transactions.Add(transaction);
+                    _context.Wallets.Update(wallet); // збереження оновленого балансу
+                    await _context.SaveChangesAsync();
 
-                _context.Add(transaction);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Success));
+                    ModelState.Clear();
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
-            return View(transaction);
-        }
+            // Повторна передача ViewBag'ів у разі помилки
+            ViewBag.Wallets = await _context.Wallets
+                .Where(w => w.ApplicationUserId == userId)
+                .ToListAsync();
 
-        public IActionResult Success()
-        {
-            return View();
+            ViewBag.Categories = new List<string> { "Їжа", "Транспорт", "Відпочинок", "Розваги", "Інше" };
+
+            ViewBag.Transactions = await _context.Transactions
+                .Include(t => t.Wallet)
+                .Where(t => t.Wallet.ApplicationUserId == userId)
+                .OrderByDescending(t => t.Date)
+                .ToListAsync();
+
+            return View(transaction);
         }
     }
 }

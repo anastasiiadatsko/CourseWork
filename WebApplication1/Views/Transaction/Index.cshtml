@@ -1,0 +1,96 @@
+﻿@using WebApplication1.Models
+@model WebApplication1.Models.Transaction
+@{
+    ViewData["Title"] = "Додати транзакцію";
+    var transactions = ViewBag.Transactions as List<WebApplication1.Models.Transaction>;
+
+    var typeOptions = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "-- Оберіть тип --", Value = "" },
+        new SelectListItem { Text = "Дохід", Value = "Income" },
+        new SelectListItem { Text = "Витрата", Value = "Expense" }
+    };
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Додати транзакцію</h2>
+
+    <form asp-action="Index" method="post" class="mb-5">
+        <div class="mb-3">
+            <label asp-for="Amount" class="form-label">Сума</label>
+            <input asp-for="Amount" class="form-control" />
+            <span asp-validation-for="Amount" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Category" class="form-label">Категорія</label>
+            <select asp-for="Category" class="form-control">
+                @foreach (var category in ViewBag.Categories as List<string>)
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="WalletId" class="form-label">Гаманець</label>
+            <select asp-for="WalletId" class="form-control">
+                @foreach (var wallet in ViewBag.Wallets)
+                {
+                    <option value="@wallet.Id">@wallet.BankName (@wallet.Balance)</option>
+                }
+            </select>
+            <span asp-validation-for="WalletId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Type" class="form-label">Тип</label>
+            @Html.DropDownListFor(m => m.Type, typeOptions, new { @class = "form-control" })
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Зберегти</button>
+    </form>
+
+    <partial name="_ValidationScriptsPartial" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    @if (transactions != null && transactions.Any())
+    {
+        <h3>Усі транзакції</h3>
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Сума</th>
+                    <th>Категорія</th>
+                    <th>Тип</th>
+                    <th>Дата</th>
+                    <th>Гаманець</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in transactions)
+                {
+                    <tr>
+                        <td>@t.Amount</td>
+                        <td>@t.Category</td>
+                        <td>@(t.Type == TransactionType.Income ? "Дохід" : "Витрата")</td>
+                        <td>@t.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@t.Wallet.BankName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Транзакцій ще немає.</p>
+    }
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
