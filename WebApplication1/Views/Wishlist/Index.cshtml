@@ -1,24 +1,56 @@
 ﻿@model IEnumerable<WebApplication1.Models.WishItem>
 
-<h2>Мій віш-лист</h2>
+@{
+    ViewData["Title"] = "Список бажань";
+}
 
-<a class="btn btn-primary" asp-action="Create">Додати бажання</a>
+<h2>@ViewData["Title"]</h2>
 
-<table class="table">
+<form asp-action="Index" method="get" class="mb-3">
+    <label for="month">Фільтр за місяцем:</label>
+    <select name="month" class="form-select w-25 d-inline">
+        <option value="">-- Усі --</option>
+        @{
+            var months = System.Globalization.CultureInfo.GetCultureInfo("uk-UA").DateTimeFormat.MonthNames;
+            for (int i = 0; i < 12; i++)
+            {
+                if (!string.IsNullOrEmpty(months[i]))
+                {
+                    var value = months[i];
+                    var selected = ViewBag.Month == value ? "selected" : "";
+                    <option value="@value" selected="@(ViewBag.Month == value ? "selected" : null)">@value</option>
+
+                }
+            }
+        }
+    </select>
+    <button type="submit" class="btn btn-outline-primary ms-2">Фільтрувати</button>
+</form>
+
+<a asp-action="Create" class="btn btn-success mb-3">➕ Додати бажання</a>
+
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Назва</th>
-            <th>Сума</th>
-            <th>Досяжне?</th>
+            <th>Сума (грн)</th>
+            <th>Придбати до</th>
+            <th>Виконано</th>
+            <th>Дії</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.OrderBy(i => i.TargetDate))
         {
             <tr>
                 <td>@item.Title</td>
-                <td>@item.DesiredAmount грн</td>
-                <td>@(item.IsAffordable ? "Так" : "Ні")</td>
+                <td>@item.TargetAmount</td>
+                <td>@item.TargetDate?.ToString("dd.MM.yyyy")</td>
+                <td>@(item.IsCompleted ? "✅" : "❌")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Редагувати</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Видалити</a>
+                </td>
             </tr>
         }
     </tbody>
