@@ -4,15 +4,15 @@ namespace WebApplication1.Models
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Email обов'язковий")]
-        [EmailAddress(ErrorMessage = "Некоректний email")]
+        [Required(ErrorMessage = "Введіть email")]
+        [EmailAddress(ErrorMessage = "Невірний email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Пароль обов'язковий")]
+        [Required(ErrorMessage = "Введіть пароль")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
-        [Display(Name = "Запамʼятати мене")]
+        [Display(Name = "Запам’ятати мене")]
         public bool RememberMe { get; set; }
     }
 }

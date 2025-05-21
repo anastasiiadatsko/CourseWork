@@ -4,8 +4,8 @@ namespace WebApplication1.Models
 {
     public class ForgotPasswordViewModel
     {
-        [Required(ErrorMessage = "Email обов'язковий")]
-        [EmailAddress(ErrorMessage = "Некоректний email")]
+        [Required(ErrorMessage = "Введіть email")]
+        [EmailAddress(ErrorMessage = "Невірний email")]
         public string Email { get; set; } = string.Empty;
     }
 }

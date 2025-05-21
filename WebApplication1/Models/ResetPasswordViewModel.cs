@@ -4,19 +4,19 @@ namespace WebApplication1.Models
 {
     public class ResetPasswordViewModel
     {
-        [Required(ErrorMessage = "Email обов'язковий")]
-        [EmailAddress(ErrorMessage = "Некоректний email")]
+        [Required]
+        public string Token { get; set; } = string.Empty;
+
+        [Required]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Пароль обов'язковий")]
-        [StringLength(100, ErrorMessage = "Мінімум 6 символів", MinimumLength = 6)]
+        [Required(ErrorMessage = "Введіть новий пароль")]
         [DataType(DataType.Password)]
-        public string Password { get; set; } = string.Empty;
+        [MinLength(6, ErrorMessage = "Пароль має бути щонайменше 6 символів")]
+        public string NewPassword { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Паролі не співпадають")]
+        [Compare("NewPassword", ErrorMessage = "Паролі не співпадають")]
         public string ConfirmPassword { get; set; } = string.Empty;
-
-        public string Code { get; set; } = string.Empty;
     }
 }

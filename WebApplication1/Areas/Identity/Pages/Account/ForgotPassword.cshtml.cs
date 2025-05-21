@@ -45,10 +45,11 @@ namespace WebApplication1.Areas.Identity.Pages.Account
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
             var callbackUrl = Url.Page(
-                "/Account/ResetPassword",
-                null,
-                new { area = "Identity", code },
-                Request.Scheme);
+    "/Account/ResetPassword",
+    null,
+    new { area = "Identity", code, email = user.Email },
+    Request.Scheme);
+
 
             await _emailSender.SendEmailAsync(
                 Input.Email,

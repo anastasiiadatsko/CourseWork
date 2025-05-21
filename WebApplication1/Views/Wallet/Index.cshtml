@@ -1,0 +1,26 @@
+﻿@model List<WebApplication1.Models.Wallet>
+
+@{
+    ViewData["Title"] = "Мої гаманці";
+}
+
+<div class="container mt-5">
+    <h2>Мої гаманці</h2>
+    <div class="row">
+        @foreach (var wallet in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow" style="background-color: @wallet.Color; color: white;">
+                    <div class="card-body">
+                        <h5 class="card-title">@wallet.BankName</h5>
+                        <p class="card-text">Карта: @wallet.CardNumber</p>
+                        <p class="card-text">Баланс: @wallet.Balance.ToString("F2") @wallet.Currency</p>
+                        <p class="card-text">Власник: @wallet.OwnerInitials</p>
+                        <a asp-action="Details" asp-controller="Wallet" asp-route-id="@wallet.Id" class="btn btn-light">Переглянути</a>
+                        <a asp-action="Edit" asp-controller="Wallet" asp-route-id="@wallet.Id" class="btn btn-outline-light mt-2">Редагувати</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
