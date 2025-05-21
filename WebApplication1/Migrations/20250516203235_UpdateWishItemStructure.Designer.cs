@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApplication1.Models;
@@ -11,9 +12,11 @@ using WebApplication1.Models;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250516203235_UpdateWishItemStructure")]
+    partial class UpdateWishItemStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -321,11 +324,8 @@ namespace WebApplication1.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("TargetAmount")
+                    b.Property<decimal?>("TargetAmount")
                         .HasColumnType("numeric");
-
-                    b.Property<DateTime?>("TargetDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -413,11 +413,9 @@ namespace WebApplication1.Migrations
 
             modelBuilder.Entity("WebApplication1.Models.WishItem", b =>
                 {
-                    b.HasOne("WebApplication1.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("WebApplication1.Models.ApplicationUser", null)
                         .WithMany("WishItems")
                         .HasForeignKey("ApplicationUserId");
-
-                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.ApplicationUser", b =>

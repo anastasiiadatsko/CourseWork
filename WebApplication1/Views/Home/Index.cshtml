@@ -1,26 +1,17 @@
 ﻿@{
-    ViewData["Title"] = "Курс валют НБУ за тиждень";
+    ViewData["Title"] = "Головна";
+
     var usdLabels = ViewBag.UsdLabels as List<string>;
     var usdValues = ViewBag.UsdValues as List<decimal>;
     var eurLabels = ViewBag.EurLabels as List<string>;
     var eurValues = ViewBag.EurValues as List<decimal>;
     var plnLabels = ViewBag.PlnLabels as List<string>;
     var plnValues = ViewBag.PlnValues as List<decimal>;
-    var weekOptions = ViewBag.WeekOptions as List<(string Label, string Value)>;
-    var selectedWeek = ViewBag.SelectedWeek as string ?? "";
+    var btcLabels = ViewBag.BtcLabels as List<string>;
+    var btcValues = ViewBag.BtcValues as List<decimal>;
 }
 
-<h2 class="text-center mb-4">Курс валют НБУ за обраний тиждень</h2>
-
-<form method="get" class="text-center mb-4">
-    <label for="weekOffset">Оберіть тиждень (дати):</label>
-    <select name="weekOffset" id="weekOffset" onchange="this.form.submit()">
-        @foreach (var (Label, Value) in weekOptions)
-        {
-            <option value="@Value" selected="@(Value == selectedWeek)">@Label</option>
-        }
-    </select>
-</form>
+<h2 class="text-center mb-4">Курс валют НБУ за останній тиждень</h2>
 
 <div class="container d-flex flex-wrap justify-content-center gap-4">
     <div class="text-center" style="width: 300px;">
@@ -34,6 +25,13 @@
     <div class="text-center" style="width: 300px;">
         <h5>PLN / Гривня</h5>
         <canvas id="plnChart" height="200"></canvas>
+    </div>
+</div>
+
+<h3 class="text-center mt-5">Динаміка курсу Bitcoin</h3>
+<div class="d-flex justify-content-center">
+    <div class="text-center" style="width: 600px;">
+        <canvas id="btcChart" height="220"></canvas>
     </div>
 </div>
 
@@ -88,4 +86,5 @@
     createChart("usdChart", @Html.Raw(Json.Serialize(usdLabels)), @Html.Raw(Json.Serialize(usdValues)), "USD/UAH", "blue");
     createChart("eurChart", @Html.Raw(Json.Serialize(eurLabels)), @Html.Raw(Json.Serialize(eurValues)), "EUR/UAH", "green");
     createChart("plnChart", @Html.Raw(Json.Serialize(plnLabels)), @Html.Raw(Json.Serialize(plnValues)), "PLN/UAH", "red");
+    createChart("btcChart", @Html.Raw(Json.Serialize(btcLabels)), @Html.Raw(Json.Serialize(btcValues)), "BTC/UAH", "orange");
 </script>
