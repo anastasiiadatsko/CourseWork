@@ -62,18 +62,33 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var wallet = await _context.Wallets.FindAsync(id);
-            if (wallet == null)
-                return NotFound();
+            if (wallet == null) return NotFound();
 
             var transactions = await _context.Transactions
-                .Where(t => t.WalletId == id)
-                .OrderByDescending(t => t.Date)
+                .Where(t => t.WalletId == id && t.Type == TransactionType.Expense)
+                .OrderBy(t => t.Date)
                 .ToListAsync();
 
-            ViewBag.Transactions = transactions;
+            var grouped = transactions
+                .GroupBy(t => t.Date.ToString("yyyy-MM-dd"))
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Total = g.Sum(t => t.Amount)
+                })
+                .ToList();
 
-            return View(wallet);
+            var model = new WalletDetailsViewModel
+            {
+                Wallet = wallet,
+                RecentTransactions = transactions.TakeLast(5).ToList(),
+                Labels = grouped.Select(x => x.Date).ToList(),
+                Amounts = grouped.Select(x => x.Total).ToList()
+            };
+
+            return View(model);
         }
+
 
 
         // Редагування (GET)
