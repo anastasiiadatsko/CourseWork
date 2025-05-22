@@ -68,6 +68,7 @@ namespace WebApplication1.Controllers
             }
 
             user.UserName = model.Name;
+            await _userManager.UpdateAsync(user);
 
             if (ProfileImage != null && ProfileImage.Length > 0)
             {
