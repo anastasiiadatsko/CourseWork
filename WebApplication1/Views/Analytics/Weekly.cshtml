@@ -1,0 +1,137 @@
+﻿@{
+    ViewData["Title"] = "Аналітика витрат по тижнях";
+    var labels = ViewBag.Labels as List<string>;
+    var amounts = ViewBag.Amounts as List<decimal>;
+    var wallets = ViewBag.Wallets as List<WebApplication1.Models.Wallet>;
+    var selectedWalletId = ViewBag.SelectedWalletId as int?;
+    var categoryLabels = ViewBag.Categories as List<string>;
+    var categoryAmounts = ViewBag.CategoryAmounts as List<decimal>;
+}
+
+<h2>Аналітика витрат по тижнях</h2>
+
+<form method="get" class="mb-4">
+    <label>Від:</label>
+    <input type="date" name="startDate" value="@ViewBag.StartDate" required />
+
+    <label>До:</label>
+    <input type="date" name="endDate" value="@ViewBag.EndDate" required />
+
+    <label>Карта:</label>
+    <select name="walletId" class="form-select" required>
+        <option value="">Оберіть</option>
+        @foreach (var wallet in wallets)
+        {
+            var isSelected = wallet.Id == selectedWalletId ? "selected=\"selected\"" : "";
+            @Html.Raw($"<option value=\"{wallet.Id}\" {isSelected}>{wallet.BankName}</option>")
+        }
+    </select>
+
+    <button type="submit" class="btn btn-primary mt-2">Показати</button>
+</form>
+
+@if (labels.Any() && amounts.Any())
+{
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 40px; margin-top: 30px;">
+        <h4>📊 Графік витрат по днях</h4>
+        <div style="max-width: 900px; width: 100%;">
+            <canvas id="weeklyChart"></canvas>
+        </div>
+
+        <h4>📌 Витрати по категоріях</h4>
+        <div style="max-width: 500px; width: 100%;">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(weeklyCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(labels)),
+                datasets: [{
+                    label: 'Витрати (грн)',
+                    data: @Html.Raw(Json.Serialize(amounts)),
+                    borderColor: '#1976d2',
+                    backgroundColor: 'rgba(25, 118, 210, 0.2)',
+                    tension: 0.3,
+                    pointBackgroundColor: '#1976d2',
+                    pointRadius: 5,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 10,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(categoryLabels)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(categoryAmounts)),
+                    backgroundColor: [
+                        '#e57373', '#81c784', '#64b5f6', '#ffb74d',
+                        '#ba68c8', '#4db6ac', '#ffd54f'
+                    ],
+                    borderColor: '#f5f5f5',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
+else
+{
+    <p class="text-muted">Оберіть період і карту, щоб переглянути аналітику.</p>
+}
+
