@@ -11,6 +11,13 @@
     var btcValues = ViewBag.BtcValues as List<decimal>;
 }
 
+@if (User.Identity?.IsAuthenticated ?? false && ViewBag.UserName != null && ViewBag.Today != null)
+{
+    <div class="alert alert-primary text-center fs-5 mt-3">
+        👋 Доброго дня, @ViewBag.UserName! Сьогодні @ViewBag.Today — чудовий день відстежити свої витрати!
+    </div>
+}
+
 <h2 class="text-center mb-4">Курс валют НБУ за останній тиждень</h2>
 
 <div class="container d-flex flex-wrap justify-content-center gap-4">
@@ -26,12 +33,9 @@
         <h5>PLN / Гривня</h5>
         <canvas id="plnChart" height="200"></canvas>
     </div>
-</div>
-
-<h3 class="text-center mt-5">Динаміка курсу Bitcoin</h3>
-<div class="d-flex justify-content-center">
-    <div class="text-center" style="width: 600px;">
-        <canvas id="btcChart" height="220"></canvas>
+    <div class="text-center" style="width: 300px;">
+        <h5>BTC / Гривня</h5>
+        <canvas id="btcChart" height="200"></canvas>
     </div>
 </div>
 

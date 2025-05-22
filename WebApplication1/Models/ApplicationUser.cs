@@ -5,6 +5,7 @@ namespace WebApplication1.Models
 {
     public class ApplicationUser : IdentityUser
     {
+        public string? Name { get; set; }
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public string? ProfileImagePath { get; set; }
         public ICollection<Wallet> Wallets { get; set; }
