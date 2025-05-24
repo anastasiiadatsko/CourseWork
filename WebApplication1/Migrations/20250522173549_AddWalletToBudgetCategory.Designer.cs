@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApplication1.Models;
@@ -11,9 +12,11 @@ using WebApplication1.Models;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250522173549_AddWalletToBudgetCategory")]
+    partial class AddWalletToBudgetCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -236,8 +239,8 @@ namespace WebApplication1.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("BudgetPercentage")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("BudgetPercentage")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
@@ -246,7 +249,7 @@ namespace WebApplication1.Migrations
                     b.Property<decimal>("LimitAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("WalletId")
+                    b.Property<int?>("WalletId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -426,9 +429,7 @@ namespace WebApplication1.Migrations
 
                     b.HasOne("WebApplication1.Models.Wallet", "Wallet")
                         .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WalletId");
 
                     b.Navigation("ApplicationUser");
 

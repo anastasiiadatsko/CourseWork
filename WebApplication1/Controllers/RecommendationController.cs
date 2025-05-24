@@ -1,47 +1,117 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
     public class RecommendationController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailSender;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RecommendationService _recommendationService;
 
-        public RecommendationController(ApplicationDbContext context)
+        public RecommendationController(
+            ApplicationDbContext context,
+            IEmailSender emailSender,
+            UserManager<ApplicationUser> userManager,
+            RecommendationService recommendationService)
         {
             _context = context;
+            _emailSender = emailSender;
+            _userManager = userManager;
+            _recommendationService = recommendationService;
         }
 
+        // 📊 Головна сторінка рекомендацій
         public async Task<IActionResult> Index()
         {
-            // Групуємо витрати по категоріях
-            var categoryData = await _context.Transactions
-                .Where(t => t.Type == TransactionType.Expense)
-                .GroupBy(t => t.Category)
-                .Select(g => new
-                {
-                    Category = g.Key,
-                    Total = g.Sum(t => t.Amount)
-                })
-                .OrderByDescending(g => g.Total)
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            // Отримуємо бюджетні категорії та витрати
+            var categories = await _context.BudgetCategories
+                .Where(c => c.ApplicationUserId == user.Id)
                 .ToListAsync();
 
-            var topCategory = categoryData.FirstOrDefault();
+            var expenses = await _context.Transactions
+                .Include(t => t.Wallet)
+                .Where(t => t.Type == TransactionType.Expense && t.Wallet.ApplicationUserId == user.Id)
+                .ToListAsync();
 
-            var recommendations = new List<string>();
+            // 🔄 Додаємо відсутні категорії на основі транзакцій
+            var existingNames = categories.Select(c => c.CategoryName.ToLower()).ToList();
+            var newExpenseCategories = expenses
+                .Select(e => e.Category)
+                .Distinct()
+                .Where(cat => !existingNames.Contains(cat.ToLower()))
+                .ToList();
 
-            if (topCategory != null)
+            foreach (var newCat in newExpenseCategories)
             {
-                recommendations.Add($"Витрати на категорію \"{topCategory.Category}\" є найвищими ({topCategory.Total} грн). Розгляньте можливість зменшити витрати в цій категорії.");
+                var walletId = expenses.First(e => e.Category == newCat).WalletId;
+
+                _context.BudgetCategories.Add(new BudgetCategory
+                {
+                    CategoryName = newCat,
+                    ApplicationUserId = user.Id,
+                    BudgetPercentage = 0,
+                    LimitAmount = 0,
+                    WalletId = walletId
+                });
             }
 
-            recommendations.Add("Рекомендується заощаджувати 20% доходу щомісяця.");
-            recommendations.Add("Створіть місячний бюджет і регулярно його перевіряйте.");
+            if (newExpenseCategories.Any())
+            {
+                await _context.SaveChangesAsync();
+                // Оновлюємо список після додавання
+                categories = await _context.BudgetCategories
+                    .Where(c => c.ApplicationUserId == user.Id)
+                    .ToListAsync();
+            }
 
-            ViewBag.Recommendations = recommendations;
+            // 📬 Генерація рекомендацій
+            var recommendations = await _recommendationService.GenerateRecommendationsAsync(user, expenses, categories);
+            return View(recommendations);
+        }
 
-            return View();
+        // ⚙️ GET: Встановлення лімітів
+        [HttpGet]
+        public async Task<IActionResult> SetLimits()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var categories = await _context.BudgetCategories
+                .Where(c => c.ApplicationUserId == user.Id)
+                .ToListAsync();
+
+            return View(categories);
+        }
+
+        // 💾 POST: Збереження лімітів
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetLimits(List<BudgetCategory> updatedCategories)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            foreach (var updated in updatedCategories)
+            {
+                var existing = await _context.BudgetCategories
+                    .FirstOrDefaultAsync(c => c.Id == updated.Id && c.ApplicationUserId == user.Id);
+
+                if (existing != null)
+                {
+                    existing.LimitAmount = updated.LimitAmount;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
     }
 }

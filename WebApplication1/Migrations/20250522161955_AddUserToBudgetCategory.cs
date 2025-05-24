@@ -5,7 +5,7 @@
 namespace WebApplication1.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTransactionModel : Migration
+    public partial class AddUserToBudgetCategory : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,7 +31,6 @@ namespace WebApplication1.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
@@ -46,20 +45,6 @@ namespace WebApplication1.Migrations
             migrationBuilder.DropColumn(
                 name: "ApplicationUserId",
                 table: "BudgetCategories");
-            
-            migrationBuilder.AddColumn<bool>(
-                name: "IsAchievable",
-                table: "WishItems",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Month",
-                table: "WishItems",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
         }
     }
 }
