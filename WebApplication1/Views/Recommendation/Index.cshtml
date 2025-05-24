@@ -1,13 +1,21 @@
-﻿@{
-    ViewData["Title"] = "Рекомендації щодо витрат";
-    var tips = ViewBag.Recommendations as List<string>;
+﻿@model List<string>
+@{
+    ViewData["Title"] = "Рекомендації по витратах";
 }
 
-<h2>Рекомендації щодо витрат</h2>
+<h2 class="mb-4">📊 Рекомендації по витратах</h2>
 
-<ul class="list-group">
-    @foreach (var tip in tips)
-    {
-        <li class="list-group-item">@tip</li>
-    }
-</ul>
+<div class="mb-3 text-end">
+    <a class="btn btn-outline-primary" asp-action="SetLimits">
+        ⚙️ Налаштувати ліміти
+    </a>
+</div>
+
+@foreach (var msg in Model)
+{
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            @Html.Raw(msg)
+        </div>
+    </div>
+}

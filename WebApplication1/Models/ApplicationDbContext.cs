@@ -9,6 +9,8 @@ namespace WebApplication1.Models // або .Data, якщо хочеш відок
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<BudgetCategory> BudgetCategories { get; set; }
+
         public DbSet<WishItem> WishItems { get; set; }
 
     }

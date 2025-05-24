@@ -10,6 +10,7 @@ namespace WebApplication1.Models
         public string? ProfileImagePath { get; set; }
         public ICollection<Wallet> Wallets { get; set; }
         public ICollection<WishItem> WishItems { get; set; }
+        public ICollection<BudgetCategory> BudgetCategories { get; set; }
 
     }
 }

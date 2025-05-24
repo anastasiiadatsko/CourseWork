@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApplication1.Models;
@@ -11,9 +12,11 @@ using WebApplication1.Models;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250522115427_AddBudgetCategory")]
+    partial class AddBudgetCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,9 +182,6 @@ namespace WebApplication1.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -235,12 +235,8 @@ namespace WebApplication1.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<double>("BudgetPercentage")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("BudgetPercentage")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
@@ -249,14 +245,7 @@ namespace WebApplication1.Migrations
                     b.Property<decimal>("LimitAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("WalletId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("WalletId");
 
                     b.ToTable("BudgetCategories");
                 });
@@ -419,25 +408,6 @@ namespace WebApplication1.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebApplication1.Models.BudgetCategory", b =>
-                {
-                    b.HasOne("WebApplication1.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("BudgetCategories")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebApplication1.Models.Wallet", "Wallet")
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Wallet");
-                });
-
             modelBuilder.Entity("WebApplication1.Models.Transaction", b =>
                 {
                     b.HasOne("WebApplication1.Models.Wallet", "Wallet")
@@ -471,8 +441,6 @@ namespace WebApplication1.Migrations
 
             modelBuilder.Entity("WebApplication1.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("BudgetCategories");
-
                     b.Navigation("Wallets");
 
                     b.Navigation("WishItems");
