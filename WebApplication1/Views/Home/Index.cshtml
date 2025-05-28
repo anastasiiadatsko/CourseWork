@@ -7,8 +7,13 @@
     var eurValues = ViewBag.EurValues as List<decimal>;
     var plnLabels = ViewBag.PlnLabels as List<string>;
     var plnValues = ViewBag.PlnValues as List<decimal>;
+
     var btcLabels = ViewBag.BtcLabels as List<string>;
     var btcValues = ViewBag.BtcValues as List<decimal>;
+    var ethLabels = ViewBag.EthLabels as List<string>;
+    var ethValues = ViewBag.EthValues as List<decimal>;
+    var solLabels = ViewBag.SolLabels as List<string>;
+    var solValues = ViewBag.SolValues as List<decimal>;
 }
 
 @if (User.Identity?.IsAuthenticated ?? false && ViewBag.UserName != null && ViewBag.Today != null)
@@ -33,9 +38,22 @@
         <h5>PLN / Гривня</h5>
         <canvas id="plnChart" height="200"></canvas>
     </div>
+</div>
+
+<h2 class="text-center mt-5 mb-4">Динаміка курсу криптовалют</h2>
+
+<div class="container d-flex flex-wrap justify-content-center gap-4">
     <div class="text-center" style="width: 300px;">
         <h5>BTC / Гривня</h5>
         <canvas id="btcChart" height="200"></canvas>
+    </div>
+    <div class="text-center" style="width: 300px;">
+        <h5>ETH / Гривня</h5>
+        <canvas id="ethChart" height="200"></canvas>
+    </div>
+    <div class="text-center" style="width: 300px;">
+        <h5>SOL / Гривня</h5>
+        <canvas id="solChart" height="200"></canvas>
     </div>
 </div>
 
@@ -91,4 +109,6 @@
     createChart("eurChart", @Html.Raw(Json.Serialize(eurLabels)), @Html.Raw(Json.Serialize(eurValues)), "EUR/UAH", "green");
     createChart("plnChart", @Html.Raw(Json.Serialize(plnLabels)), @Html.Raw(Json.Serialize(plnValues)), "PLN/UAH", "red");
     createChart("btcChart", @Html.Raw(Json.Serialize(btcLabels)), @Html.Raw(Json.Serialize(btcValues)), "BTC/UAH", "orange");
+    createChart("ethChart", @Html.Raw(Json.Serialize(ethLabels)), @Html.Raw(Json.Serialize(ethValues)), "ETH/UAH", "purple");
+    createChart("solChart", @Html.Raw(Json.Serialize(solLabels)), @Html.Raw(Json.Serialize(solValues)), "SOL/UAH", "gray");
 </script>

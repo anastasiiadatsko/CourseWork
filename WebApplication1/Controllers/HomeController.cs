@@ -47,17 +47,25 @@ public class HomeController : Controller
         ViewBag.PlnLabels = pln.Select(x => x.Exchangedate).ToList();
         ViewBag.PlnValues = pln.Select(x => x.Rate).ToList();
 
-        // --- BTC курс ---
-        var btcData = await _btcService.GetPricesForPeriodAsync("bitcoin", startDate, endDate);
+        // --- Криптовалюти ---
+        var btc = await _btcService.GetPricesForPeriodAsync("bitcoin", startDate, endDate);
+        var eth = await _btcService.GetPricesForPeriodAsync("ethereum", startDate, endDate);
+        var sol = await _btcService.GetPricesForPeriodAsync("solana", startDate, endDate);
 
-        ViewBag.BtcLabels = btcData.Select(x => x.Date).ToList();
-        ViewBag.BtcValues = btcData.Select(x => x.Price).ToList();
+        ViewBag.BtcLabels = btc.Select(x => x.Date).ToList();
+        ViewBag.BtcValues = btc.Select(x => x.Price).ToList();
+
+        ViewBag.EthLabels = eth.Select(x => x.Date).ToList();
+        ViewBag.EthValues = eth.Select(x => x.Price).ToList();
+
+        ViewBag.SolLabels = sol.Select(x => x.Date).ToList();
+        ViewBag.SolValues = sol.Select(x => x.Price).ToList();
 
         return View();
     }
-
     public IActionResult Privacy()
     {
         return View();
     }
+
 }
